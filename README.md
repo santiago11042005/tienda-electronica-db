@@ -246,7 +246,28 @@ CREATE PROCEDURE sp_ReporteStockBajo()
 BEGIN SELECT id_producto, nombre, stock FROM Productos WHERE stock < 5; END //
 
 DELIMITER ;
+-- FASE 5: SCRIPTS DE VALIDACIÓN Y PRUEBAS DE INTEGRIDAD
 
+-- Prueba 1: Control de Reseñas Fraudulentas (Intento de registrar reseña sin compra previa)
+CALL sp_RegistrarResena(1, 5, 5, 'Intento de reseña fraudulenta', @resultado1);
+SELECT @resultado1 AS Verificacion_Regla_Resenas;
+
+
+-- Prueba 2: Reporte de Inventario Crítico (Monitoreo de productos con stock menor a 5 unidades)
+CALL sp_ReporteStockBajo();
+
+
+-- Prueba 3: Restricción de Pedidos Pendientes (Intentar registrar un pedido para un cliente con límite alcanzado)
+CALL sp_RegistrarPedido(1, 14, 1, @resultado_pedido);
+SELECT @resultado_pedido AS Validacion_Limite_Pedidos;
+
+
+-- Prueba 4: Flujo Completo de Venta (Procesamiento exitoso y actualización automática de stock)
+CALL sp_RegistrarPedido(2, 1, 1, @resultado_exito);
+SELECT @resultado_exito AS Procesamiento_Pedido_Exitoso;
+
+-- Verificación final del descuento de existencias en inventario
+SELECT id_producto, nombre, stock FROM Productos WHERE id_producto = 1;
 CALL sp_RegistrarResena(1, 5, 5, 'Intento de reseña fraudulenta', @resultado1);
 SELECT @resultado1 AS Verificacion_Regla_Resenas;
 CALL sp_ReporteStockBajo();
